@@ -1,6 +1,11 @@
 "itemText","timeCreated","timeCompleted","isCompleted","itemID"
 "Modify streamstats API code",2016-06-16 13:41:17,NA,FALSE,1
 "What's with negative streamflow values?",2016-06-19 14:30:04,NA,FALSE,2
-"Access all usgs data for a given hour",2016-06-19 16:29:46,NA,FALSE,3
+"Access all usgs data for a given hour",2016-06-19 16:29:46,2016-06-20 12:59:54,TRUE,3
 "find out whether USGS times need to be adjusted",2016-06-20 11:13:11,NA,FALSE,4
-"Join to NHDPlus reaches.",2016-06-20 11:20:19,NA,FALSE,5
+"Join to NHDPlus reaches.",2016-06-20 11:20:19,2016-06-20 12:34:45,TRUE,5
+"Investigate 580 missing comIDs after joingin usgs to reaches",2016-06-20 12:34:28,NA,FALSE,6
+"aggregate USGS snapshots to time-resolution of forecast products",2016-06-20 12:56:22,NA,FALSE,7
+"Scrutinize Arroyo Colorado comparison",2016-06-20 12:57:20,NA,FALSE,8
+"Write functions to streamline data import and preprocessing for forecast products",2016-06-20 12:58:03,NA,FALSE,9
+"Write functions to calculate comparison statistics",2016-06-20 12:59:17,NA,FALSE,10

@@ -83,7 +83,8 @@ st1 <- open.nc("data/ncdf/nwm.t00z.short_range.channel_rt.f004.conus.nc_georefer
 st2 <- read.nc(st1)
 st3 <- st2[-1] %>% 
   lapply(as.vector) %>% 
-  data.frame()
+  data.frame() %>% 
+  mutate(reach = as.character(station_id))
 ```
 
 todo$add("find out whether USGS times need to be adjusted")
@@ -102,5 +103,54 @@ usgs4 <- usgs3 %>%
 
 glimpse(usgs4)
 glimpse(st3)
+
+summary(as.numeric(usgs4$reach)) #689 are missing reach info. 
 ```
+
+Unclear how reach number relates to stationId.
+
+```{r}
+summary(st3$station_id)
+head(st3$station_id)
+
+summary(as.numeric())
+head(usgs4$reach)
+```
+
+Redoing with new key file. Obtained from [here](http://www.horizon-systems.com/NHDPlus/V2NationalData.php). (NHDPlusV21_NationalData_GageLoc_05.7z file)
+
+```{r}
+gageinfo <- read.csv("data/gageloc/GageLoc.csv")
+glimpse(gageinfo)
+
+gageinfo <- read.csv("data/gageloc/GageLoc.csv", colClasses = "character") %>% 
+  transmute(reach = FLComID.N.9.0, stationId = SOURCE_FEA.C.40)
+
+usgs4 <- usgs3 %>% 
+  left_join(gageinfo, by = "stationId")
+
+sapply(usgs4, function(x) sum(is.na(x))) 
+```
+
+So 580 gages missing COMIDs. 
+todo$add("Investigate 580 missing comIDs after joingin usgs to reaches")
+
+Now join usgs to nwm forecasts.
+
+```{r}
+glimpse(usgs4)
+glimpse(st3)
+dat1 <- usgs4 %>% 
+  left_join(st3, by = "reach")
+
+glimpse(dat1)
+cache(dat1)
+```
+
+Amost time to give this project a rest for now. Before I do, sketch out next steps. 
+
+todo$add("aggregate USGS snapshots to time-resolution of forecast products")
+todo$add("Scrutinize Arroyo Colorado comparison")
+todo$add("Write functions to streamline data import and preprocessing for forecast products")
+todo$add("Write functions to calculate comparison statistics")
 
