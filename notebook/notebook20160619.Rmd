@@ -1,0 +1,122 @@
+---
+title: "notebook20160619"
+author: "Mark Hagemann"
+date: "June 19, 2016"
+output: html_document
+---
+
+Still trying to install udunits2 package. Reinstalled udunits2 on system using Ubuntu software center. But still having configuration failure for R package.
+
+Tying again to specify installation details. 
+
+Actually let's try specifying environment variables.
+
+- in .profile.
+
+```{r}
+install.packages("udunits2", configure.args = )
+```
+
+This from [install.packages documentation](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/install.packages.html)
+
+```{r}
+install.packages(c("ncdf4", "RNetCDF"),@
+  configure.args = c(RNetCDF = "--with-netcdf-include=/usr/bin/udunits2"))
+```
+
+Didn't work. 
+
+Apparently I need the dev version? [says so here](http://stackoverflow.com/a/11331268).
+
+```{r}
+install.packages("udunits2")
+```
+
+OK, that worked!
+
+```{r}
+install.packages(c("ncdf", "ncdf4", "RNetCDF", "ncdf.tools"))
+
+install.packages("ncdf4")
+```
+
+Hmm. Looks like ncdf4 requires nc-config, which may only be available when installing from source? Maybe I can just get by using RNetCDF and ncdf.tools.
+
+```{r}
+library(ncdf.tools)
+library(RNetCDF)
+
+?ncdf.tools::readNcdf #appears to actually be easier.
+?RNetCDF::read.nc
+
+foo <- readNcdf("~/Downloads/nwm.t00z.short_range.channel_rt.f004.conus.nc_georeferenced.nc")
+foo <- readNcdf("~/Downloads/nwm.t06z.medium_range.channel_rt.f003.conus.nc_georeferenced.nc")
+```
+
+Error: "Not possible to detect variable name!" Try opening with RNetCDF
+
+```{r}
+nc1 <- RNetCDF::open.nc("~/Downloads/nwm.t00z.short_range.channel_rt.f004.conus.nc_georeferenced.nc")
+
+nc2 <- read.nc(nc1)
+```
+
+That worked! It's a 'large list'.
+
+```{r}
+str(nc2, 1)
+sapply(nc2, class)
+
+nc3 <- nc2[-1] %>% 
+  lapply(as.vector) %>% 
+  data.frame()
+str(nc3, 1)
+
+nc3$nudge %>% as.factor %>% summary
+```
+
+todo$add("Understand, document structure of ncdf data")
+todo
+
+
+```{r}
+glimpse(nc3)
+```
+
+Map this.
+
+```{r}
+library(leaflet)
+
+nc3 %>% 
+  sample_n(1000) %>% 
+  mutate(logflow = log(streamflow)) %>% 
+  summary()
+  leaflet() %>% 
+  addTiles() %>% 
+  addCircleMarkers(lng = ~longitude, lat = ~latitude, radius = ~logflow / max(logflow) * 5,
+                   stroke = FALSE)
+```
+
+todo$add("What's with negative streamflow values?")
+
+How is time represented in the netcdf?
+
+```{r}
+glimpse(nc3)
+```
+
+Just one snapshot time per file. 
+
+How about size?
+
+```{r}
+pryr::object_size(nc3)
+```
+
+151 MB. So really not THAT big. 
+
+Hardest part is going to be pulling in the requisite USGS data. todo$add("Access all usgs data for a given hour")
+
+
+

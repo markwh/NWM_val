@@ -1,0 +1,106 @@
+---
+title: "notebook20160620"
+author: "Mark Hagemann"
+date: "June 20, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Today I'll look at a simulation output file.
+
+First, here's the forecast file I looked at yesterday.
+
+```{r}
+nc1 <- RNetCDF::open.nc("~/Downloads/nwm.t00z.short_range.channel_rt.f004.conus.nc_georeferenced.nc")
+
+nc2 <- read.nc(nc1)
+
+str(nc2, 1)
+```
+
+OK, this apparently doesn't preserve the date for which it was created. Good to know. 
+
+For now I'll get the simulation file for channels from 20160618t00z. I think that may have been what I have for the short-term forecast.
+
+```{r}
+assim1 <- open.nc("~/Downloads/nwm.20160618.t00z.analysis_assim.channel_rt.tm00.conus.nc_georeferenced.nc")
+assim2 <- read.nc(assim1)
+
+str(assim2, 1)
+```
+
+Appears to have same structure as forecast output. Not clear how data plays into this. 
+
+Are all 2.7M reaches acounted for? Yes; that's the length of the vector for each product.
+
+### Getting USGS gage data to compare
+
+I found USGS stream gages indexed to NHDPlus locations [here](https://www.sciencebase.gov/catalog/item/555a2659e4b0a92fa7ea0fac).
+
+It appears I can extract this info from the .dbf file in the shapefile folder.
+
+- ***Convert to csv first!***
+
+```{r}
+gageinfo <- read.csv("data/Gage_Loc_052015.csv", colClasses = "character") %>% 
+  transmute(reach = REACHCODE.C.14, stationId = SOURCE_FEA.C.40)
+pryr::object_size(gageinfo) # 4 MB, or 9.9MB when coerced to character
+head(gageinfo)
+str(gageinfo)
+```
+
+So now I have a mapping of streamgages to NHDPlus reaches. But I'd rather not have to request data using dataRetrieval every hour. 
+
+- AHA! It's available from the tethys app. See "USGS timeslices"
+    - in 15-min resolution!
+- Getting 20160618 00:00:00 timeslice.
+
+```{r}
+usgs1 <- open.nc("data/ncdf/2016-06-18_00-00-00.15min.usgsTimeSlice.ncdf")
+usgs2 <- read.nc(usgs1)
+pryr::object_size(usgs2) # Pretty small (0.5 MB)
+
+str(usgs2, 1)
+
+usgs3 <- usgs2 %>% 
+  lapply(as.vector) %>% 
+  data.frame() %>% 
+  mutate(stationId = trimws(stationId),
+         time = ymd_hms(time))
+
+str(usgs3)
+```
+
+Also moving all netcdf data to data/ncdf/ folder.
+
+Here's how it will look in munge/ script.
+
+```{r}
+st1 <- open.nc("data/ncdf/nwm.t00z.short_range.channel_rt.f004.conus.nc_georeferenced.nc")
+st2 <- read.nc(st1)
+st3 <- st2[-1] %>% 
+  lapply(as.vector) %>% 
+  data.frame()
+```
+
+todo$add("find out whether USGS times need to be adjusted")
+
+Potential problem: the gage mapping I have is from 2015; new gages may have come online since then. 
+
+- Ignore this for now. Later I can make a new mapping object. 
+
+todo$add("Join to NHDPlus reaches.")
+
+```{r}
+glimpse(usgs3)
+glimpse(gageinfo)
+usgs4 <- usgs3 %>% 
+  left_join(gageinfo, by = "stationId")
+
+glimpse(usgs4)
+glimpse(st3)
+```
+

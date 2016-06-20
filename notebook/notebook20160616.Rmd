@@ -1,0 +1,12 @@
+---
+title: "notebook20160616"
+author: "Mark Hagemann"
+date: "June 16, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+todo$add("Modify streamstats API code")

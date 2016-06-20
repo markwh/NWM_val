@@ -1,0 +1,53 @@
+---
+title: "notebook20160618"
+author: "Mark Hagemann"
+date: "June 18, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+```
+
+Looking at NWM output via the [tethys app](https://apps.hydroshare.org/apps/nwm-data-explorer/files_explorer/). 
+
+Starting with short range/20160617
+
+What's the difference between:
+
+1. channel
+2. land
+3. reservoir
+4. terrain?
+
+Appears to be hourly--t00z through t23z
+
+Downloaded file "nwm.t00z.short_range.channel_rt.f004.conus.nc_georeferenced.nc"
+
+Now open with Panoply
+
+- OK, this only allows plotting?
+- unclear whether this will be useful. 
+
+Try instead using R package
+
+```{r}
+install.packages("RNetCDF")
+install.packages("ncdf4")
+install.packages("ncdf.tools")
+```
+
+Hmm. Problem with udunits.
+
+```{r}
+install.packages("udunits2")
+```
+
+
+"ncdf.tools" is built upon "RNetCDF" to simplify workflows. 
+
+```{r}
+library(RNet)
+```
+
