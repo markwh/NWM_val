@@ -1,0 +1,140 @@
+---
+title: "notebook20160621"
+author: "Mark Hagemann"
+date: "June 21, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Still trying to access data via API. Yesterday I ran into certificate issues.
+
+Today trying a new approach with RCurl package.
+
+```{r}
+library(RCurl)
+
+foo <- getURLContent(url, ssl.verifypeer = FALSE)
+str(foo)
+
+foo <- getURLContent("http://www.markhagemann.com/")
+foo <- getURLContent("http://www.markhagemann.com/")
+getURL(url, ssl.verifypeer = FALSE, write = function(txt) )
+foo <- getBinaryURL(url, ssl.verifypeer = FALSE)
+
+download.file(url, "data/tmp.nc", method = "wget", extra = "--no-check-certificate")
+
+```
+
+OK, the wget method appears to work! 
+
+- How much time will each file take?
+
+```{r}
+t1 <- Sys.time()
+getShortTerm(date = "2016-06-18", hour = 0, lead = 5, file = "data/6_18_0z_5l.nc", quiet = TRUE)
+t2 <- Sys.time()
+
+t2 - t1
+```
+
+Strange. The downloading appears to happen quickly, but R/RStudio has a substantial lag and CPU load.
+
+Trying a different approach, from [here](http://stackoverflow.com/questions/14426359/downloading-large-files-with-r-rcurl-efficiently).
+
+```{r}
+
+myurl <- getShortTerm(date = "2016-06-18", hour = 0, lead = 5, file = "data/6_18_0z_5l.nc", quiet = TRUE, download = FALSE)
+
+
+f <- CFILE("data/test1.wc", mode = "wb")
+curlPerform(url = myurl, 
+            list(writedata = f@ref, ssl.verifypeer = FALSE))
+close(f)
+```
+
+
+Try again using the same thread
+
+```{r}
+bdown=function(url, file, ...){
+    library('RCurl')
+    f = CFILE(file, mode="wb")
+    a = curlPerform(url = url, writedata = f@ref, noprogress=FALSE, ...)
+    close(f)
+    return(a)
+}
+
+bdown(url = myurl, file = "data/test2.nc", ssl.verifypeer = 0L)
+```
+
+### Case Study locations
+
+Taking a break from data loading. Work instead now on case study location.
+
+#### USGS gages
+
+I should try to get 2-3 of these. 
+
+First, Arroyo Colorado, USGS no. 08470500
+
+```{r}
+# glimpse(dat1)
+# 
+# dat1 %>% 
+#   filter(stationId == "08470500")
+# 
+# usgs3 %>% 
+#   filter(stationId == "8470500")
+
+usgs3 %>% 
+  mutate(stationId = as.numeric(stationId)) %>% 
+  arrange(stationId) %>% 
+  `[`(4101:4400, )
+```
+
+Can't find that in the gage key! Looking now at gage info.
+
+```{r}
+gageinfo <- read.csv("data/GageInfo.csv")
+glimpse(gageinfo)
+
+arroyorows <- grep("arroyo", gageinfo$STATION_NM.C.60, ignore.case = TRUE)
+arroyorows
+
+gageinfo$STATION_NM.C.60[arroyorows]
+
+acrows <- grep("arroyo colorado", gageinfo$STATION_NM.C.60, ignore.case = TRUE)
+acrows
+
+gageinfo[acrows, ]
+
+
+gageloc <- read.csv("data/gageloc/GageLoc.csv", colClasses = "character")
+gageloc %>% glimpse
+gageloc %>% 
+  filter(SOURCE_FEA.C.40 == "08470500")
+```
+
+OK, so it has a comID. And it's ***210083***
+
+- Look for that in the forecast. 
+
+```{r}
+
+```
+
+Problem is it's not in snapshot...
+
+```{r}
+stas <- usgs2$stationId
+grep("8470500", stas)
+```
+
+Yes. 
+
+But that doesn't matter for our purposes (pilot), since we can download a single station's data manually.
+
+

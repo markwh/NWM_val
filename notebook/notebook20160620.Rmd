@@ -154,3 +154,21 @@ todo$add("Scrutinize Arroyo Colorado comparison")
 todo$add("Write functions to streamline data import and preprocessing for forecast products")
 todo$add("Write functions to calculate comparison statistics")
 
+## Afternoon session
+
+Back after a lunch break. Looking again at iRods data. This is where real-time NWM output can be found. 
+
+- How to change zone?
+    - OK, just simple matter of using icd to proper location. In this case I did `icd /nwmZone/home/nwm/data`
+- I should probably use their REST API eventually. todo$add("grok iRODS REST API")
+
+### Checking out Arroyo Colorado data
+
+Idea is to start with 2-3 stations, get stats for these first. 
+
+Still need to get lots of datasets. Should automate this. Probaby via api. 
+
+1. get 2 datasets (usgs and an arbitrary forecast)
+2. subset to just the locations I'm interested in.
+3. rm all but the little piece 
+

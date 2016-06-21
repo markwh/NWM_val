@@ -13,7 +13,7 @@
 nwm_get <- function(service, arglist = list(), check = TRUE) {
   
   dots <- arglist[!sapply(arglist, is.null)]
-  url0 <- paste0('https://apps.hydroshare.org/apps/nwm-data-explorer/api/',
+  url0 <- paste0('https://apps.hydroshare.org/apps/nwm-data-explorer/api/GetWaterML/',
                  service)
   append <- nwm_makeArgs(dots)
   
@@ -84,7 +84,6 @@ nwm_makeArgs <- function(arglist) {
   
   # stopifnot(all(sapply(arglist, is.character)))
   # stopifnot(all(sapply(arglens, `<`, 3)))
-  
   
   # separate operators
   al2 <- lapply(arglist, paste, collapse = "&")

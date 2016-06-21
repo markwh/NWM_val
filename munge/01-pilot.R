@@ -35,11 +35,11 @@ as3 <- as2[-1] %>%
 
 ## Joining datasets
 
-gageinfo <- read.csv("data/gageloc/GageLoc.csv", colClasses = "character") %>% 
+gageloc <- read.csv("data/gageloc/GageLoc.csv", colClasses = "character") %>% 
   transmute(reach = FLComID.N.9.0, stationId = SOURCE_FEA.C.40)
 
 usgs4 <- usgs3 %>% 
-  left_join(gageinfo, by = "stationId")
+  left_join(gageloc, by = "stationId")
 
 dat1 <- usgs4 %>% 
   left_join(st3, by = "reach")
