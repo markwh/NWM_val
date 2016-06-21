@@ -137,4 +137,52 @@ Yes.
 
 But that doesn't matter for our purposes (pilot), since we can download a single station's data manually.
 
+*****
+
+Sheesh, I just had to delete and restore my chroot from a backup. It may be time I switched over to docker (with packrat) on an EC2 instance...
+
+Before I go today, I must first
+
+1. Get a full list of USGS gages
+2. Get corresponding com IDs
+3. Get com IDs for A. Colorado from teammates
+4. Assemble into a document to send to Fernando
+
+#### 1. Full list of USGS gages
+
+```{r}
+carows <- grep("^cahaba r", tolower(gageinfo$STATION_NM.C.60))
+carows
+
+cahab <- gageinfo[carows, ] %>% 
+  filter(Active.C.1 == 1)
+cahab
+
+gageloc %>% 
+  filter(SOURCE_FEA.C.40 == "02423380")
+```
+
+Yes indeed, 1 corresponds to an active gage. 
+
+```{r}
+cahabgages <- cahab$GAGEID.C.16
+cahabgages
+```
+
+#### 2. Get com IDs
+
+```{r}
+glimpse(gageloc)
+
+cahabloc <- gageloc %>% 
+  mutate(GAGEID.C.16 = as.numeric(SOURCE_FEA.C.40)) %>% 
+  filter(as.numeric(SOURCE_FEA.C.40) %in% cahabgages)
+
+
+cahab_join <- cahab %>% 
+  left_join(cahabloc, by = "GAGEID.C.16")
+
+cache("cahab_join")
+write.csv(cahab_join, "cahab.csv", row.names = FALSE)
+```
 
