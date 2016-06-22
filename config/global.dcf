@@ -6,7 +6,7 @@ munging: FALSE
 logging: FALSE
 load_libraries: TRUE
 libraries: reshape2, ggplot2, stringr, lubridate, dplyr, RNetCDF, ncdf.tools, 
- todoList, RCurl, httr,
+ todoList, RCurl, httr, dataRetrieval,
  leaflet
 as_factors: TRUE
 data_tables: FALSE
